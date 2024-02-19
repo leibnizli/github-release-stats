@@ -42,7 +42,7 @@ $("#username").keyup(function (event) {
 function getUserRepos() {
     var user = $("#username").val();
 
-    var autoComplete = $('#repository').typeahead({ 
+    var autoComplete = $('#repository').typeahead({
         autoSelect: true,
         afterSelect: function() {
             $("#get-stats-button").click();
@@ -83,9 +83,9 @@ function showStats(data) {
     var html = "";
 
     if(err) {
-        html += "<div class='col-md-6 col-md-offset-3 alert alert-danger output'>" + errMessage + "</div>";
+        html += "<div class='col-md-10 col-md-offset-1 alert alert-danger output'>" + errMessage + "</div>";
     } else {
-        html += "<div class='col-md-6 col-md-offset-3 output'>";
+        html += "<div class='col-md-10 col-md-offset-1 output'>";
 
         var isLatestRelease = getQueryVariable("page") == 1 ? true : false;
         var totalDownloadCount = 0;
@@ -121,7 +121,7 @@ function showStats(data) {
                     var lastUpdate = asset.updated_at.split("T")[0];
 
                     downloadInfoHTML += "<li><code>" + asset.name + "</code> (" + assetSize + "&nbsp;MiB) - " +
-                        "downloaded " + formatNumber(asset.download_count) + "&nbsp;times. " +
+                        "downloaded " + `<b>${formatNumber(asset.download_count)}</b>` + "&nbsp;times. " +
                         "Last&nbsp;updated&nbsp;on&nbsp;" + lastUpdate + "</li>";
 
                     totalDownloadCount += asset.download_count;
@@ -150,7 +150,7 @@ function showStats(data) {
 
             if(releaseDownloadCount) {
                 html += "<li><span class='glyphicon glyphicon-download'></span>&nbsp;&nbsp;" +
-                    "Downloads: " + formatNumber(releaseDownloadCount) + "</li>";
+                    "Downloads: " + `<b>${formatNumber(releaseDownloadCount)}</b>` + "</li>";
             }
 
             html += "</ul>";
@@ -163,7 +163,7 @@ function showStats(data) {
         if(totalDownloadCount) {
             var totalHTML = "<div class='row total-downloads'>";
             totalHTML += "<h1><span class='glyphicon glyphicon-download'></span>&nbsp;&nbsp;Total Downloads</h1>";
-            totalHTML += "<span>" + formatNumber(totalDownloadCount) + "</span>";
+            totalHTML += "<span>" + `<b>${formatNumber(totalDownloadCount)}</b>` + "</span>";
             totalHTML += "</div>";
 
             html = totalHTML + html;
