@@ -42,7 +42,7 @@ $("#username").keyup(function (event) {
 function getUserRepos() {
     var user = $("#username").val();
 
-    var autoComplete = $('#repository').typeahead({ 
+    var autoComplete = $('#repository').typeahead({
         autoSelect: true,
         afterSelect: function() {
             $("#get-stats-button").click();
@@ -77,17 +77,17 @@ function showStats(data) {
 
     if(data.length == 0) {
         err = true;
-        errMessage = "There are no releases for this project";
+        errMessage = getQueryVariable("page") > 1 ? "No more releases" : "There are no releases for this project";
     }
 
     var html = "";
 
     if(err) {
-        html += "<div class='col-md-6 col-md-offset-3 alert alert-danger output'>" + errMessage + "</div>";
+        html += "<div class='col-md-10 col-md-offset-1 alert alert-danger output'>" + errMessage + "</div>";
     } else {
-        html += "<div class='col-md-6 col-md-offset-3 output'>";
+        html += "<div class='col-md-10 col-md-offset-1 output'>";
 
-        var isLatestRelease = true;
+        var isLatestRelease = getQueryVariable("page") == 1 ? true : false;
         var totalDownloadCount = 0;
         $.each(data, function(index, item) {
             var releaseTag = item.tag_name;
@@ -121,7 +121,7 @@ function showStats(data) {
                     var lastUpdate = asset.updated_at.split("T")[0];
 
                     downloadInfoHTML += "<li><code>" + asset.name + "</code> (" + assetSize + "&nbsp;MiB) - " +
-                        "downloaded " + formatNumber(asset.download_count) + "&nbsp;times. " +
+                        "downloaded " + `<b>${formatNumber(asset.download_count)}</b>` + "&nbsp;times. " +
                         "Last&nbsp;updated&nbsp;on&nbsp;" + lastUpdate + "</li>";
 
                     totalDownloadCount += asset.download_count;
@@ -150,7 +150,7 @@ function showStats(data) {
 
             if(releaseDownloadCount) {
                 html += "<li><span class='glyphicon glyphicon-download'></span>&nbsp;&nbsp;" +
-                    "Downloads: " + formatNumber(releaseDownloadCount) + "</li>";
+                    "Downloads: " + `<b>${formatNumber(releaseDownloadCount)}</b>` + "</li>";
             }
 
             html += "</ul>";
@@ -163,7 +163,7 @@ function showStats(data) {
         if(totalDownloadCount) {
             var totalHTML = "<div class='row total-downloads'>";
             totalHTML += "<h1><span class='glyphicon glyphicon-download'></span>&nbsp;&nbsp;Total Downloads</h1>";
-            totalHTML += "<span>" + formatNumber(totalDownloadCount) + "</span>";
+            totalHTML += "<span>" + `<b>${formatNumber(totalDownloadCount)}</b>` + "</span>";
             totalHTML += "</div>";
 
             html = totalHTML + html;
@@ -180,12 +180,21 @@ function showStats(data) {
 }
 
 // Callback function for getting release stats
-function getStats() {
+function getStats(page, perPage) {
     var user = $("#username").val();
     var repository = $("#repository").val();
 
-    var url = apiRoot + "repos/" + user + "/" + repository + "/releases";
+    var url = apiRoot + "repos/" + user + "/" + repository + "/releases" +
+        "?page=" + page + "&per_page=" + perPage;
     $.getJSON(url, showStats).fail(showStats);
+}
+
+// Redirection function
+function redirect(page, perPage) {
+    window.location = "?username=" + $("#username").val() +
+        "&repository=" + $("#repository").val() +
+        "&page=" + page + "&per_page=" + perPage +
+        ((getQueryVariable("search") == "0") ? "&search=0" : "");
 }
 
 // The main function
@@ -198,26 +207,40 @@ $(function() {
     $("#username").change(getUserRepos);
 
     $("#get-stats-button").click(function() {
-        window.location = "?username=" + $("#username").val() +
-            "&repository=" + $("#repository").val() +
-            ((getQueryVariable("search") == "0") ? "&search=0" : "");
+        redirect(page, perPage);
+    });
+
+    $("#get-prev-results-button").click(function() {
+        redirect(page > 1 ? --page : 1, perPage);
+    });
+
+    $("#get-next-results-button").click(function() {
+        redirect(++page, perPage);
+    });
+
+    $("#per-page select").on('change', function() {
+        if(username == "" && repository == "") return;
+        redirect(page, this.value);
     });
 
     var username = getQueryVariable("username");
     var repository = getQueryVariable("repository");
     var showSearch = getQueryVariable("search");
+    var page = getQueryVariable("page") || 1;
+    var perPage = getQueryVariable("per_page") || 5;
 
     if(username != "" && repository != "") {
         $("#username").val(username);
         $("#title .username").text(username);
         $("#repository").val(repository);
         $("#title .repository").text(repository);
+        $("#per-page select").val(perPage);
         validateInput();
         getUserRepos();
         $(".output").hide();
         $("#description").hide();
         $("#loader-gif").show();
-        getStats();
+        getStats(page, perPage);
 
         if(showSearch == "0") {
             $("#search").hide();

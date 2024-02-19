@@ -40,7 +40,7 @@
     <div class="container">
         <div class="row" id="search">
             <div class="col-md-4 col-md-offset-4">
-                <h1>Enter project details...</h1>
+                <h1>Enter project...</h1>
                 <div class="form form-inline">
                     <div class="form-group">
                         <input type="text" class="form-control" id="username" placeholder="Github username">
@@ -74,6 +74,25 @@
             </div>
         </div>
         <div class="row" id="stats-result">
+        </div>
+        <div class="row">
+            <nav id="pagination">
+                <ul class="pager">
+                    <li><a id="get-prev-results-button" href="#">Newer</a></li>
+                    <li><a id="get-next-results-button" href="#">Older</a></li>
+                </ul>
+                <div id="per-page">
+                    <label class="">Per page</label>
+                    <select class="form-control">
+                        <option>5</option>
+                        <option>10</option>
+                        <option>15</option>
+                        <option>20</option>
+                        <option>25</option>
+                        <option>30</option>
+                    </select>
+                </div>
+            </nav>
         </div>
         <div id="loader-gif">
             <img src="img/gif-load.gif">
